@@ -1,5 +1,6 @@
 (ns giggin.components.orders
-  (:require [giggin.state :as state]))
+  (:require [giggin.state :as state]
+            [giggin.helpers :refer [format-price]]))
 
 (defn get-gig-property-by-id [id]
   (fn [property] (get-in @state/gigs [id property])))
@@ -28,17 +29,21 @@
 
 (defn orders []
   [:aside
-   [:div.order
-    [:div.body
-     (for [[id quant] @state/orders]
-       (order-item id quant))]
-    [:div.total
-     [:hr]
-     [:div.item
-      [:div.content "Total"]
-      [:div.action
-       [:div.price (total)]]
-      [:button.btn.btn--link.tooltip
-       {:data-tooltip "REmove All"
-        :on-click #(reset! state/orders {})}
-       [:i.icon.icon--delete]]]]]])
+   (if (empty? @state/orders)
+     [:div.empty
+      [:div.title "You don't have any orders"]
+      [:div.subtitle "Click on + to add an order"]]
+     [:div.order
+      [:div.body
+       (for [[id quant] @state/orders]
+         (order-item id quant))]
+      [:div.total
+       [:hr]
+       [:div.item
+        [:div.content "Total"]
+        [:div.action
+         [:div.price (format-price (total))]]
+        [:button.btn.btn--link.tooltip
+         {:data-tooltip "Remove All"
+          :on-click #(reset! state/orders {})}
+         [:i.icon.icon--delete]]]]])])
